@@ -1,23 +1,24 @@
-﻿
+﻿using Microsoft.EntityFrameworkCore;
+
 namespace MyMoviesAPI.Services.MovieService
 {
     public class MovieService : IMovieService
     {
-        private static List<Movie> movies = new List<Movie>
-            {
-                new Movie { Id = 1, Title = "The Matrix", Director = "The Wachowski Brothers", YearOfRelease =  1997 },
-                new Movie { Id = 2, Title = "The Godfather", Director = "Francis Ford Coppola", YearOfRelease =  1997 },
-                new Movie { Id = 3, Title = "The Dark Knight", Director = "Christopher Nolan", YearOfRelease =  1997 }
-            };
-
-        public List<Movie> GetAllMovies()
+        private readonly DataContext _context;
+        public MovieService(DataContext context) 
         {
+            _context = context;
+        }
+
+        public async Task<List<Movie>> GetAllMovies()
+        {
+            var movies = await _context.Movies.ToListAsync();
             return movies;
         }
 
-        public Movie GetSingleMovie(int id)
+        public async Task<Movie?> GetSingleMovie(int id)
         {
-            var movie = movies.Find(m => m.Id == id);
+            var movie = await _context.Movies.FindAsync(id);
 
             if (movie is null)
                 return null;
@@ -25,15 +26,16 @@ namespace MyMoviesAPI.Services.MovieService
             return movie;
         }
 
-        public List<Movie> AddMovie(Movie movie)
+        public async Task<List<Movie>> AddMovie(Movie movie)
         {
-            movies.Add(movie);
-            return movies;
+            _context.Movies.Add(movie);
+            await _context.SaveChangesAsync();
+            return await GetAllMovies();
         }
 
-        public List<Movie>? UpdateMovie(int id, Movie request)
+        public async Task<List<Movie>?> UpdateMovie(int id, Movie request)
         {
-            var movie = movies.Find(m => m.Id == id);
+            var movie = await _context.Movies.FindAsync(id);
 
             if (movie is null)
                 return null;
@@ -42,18 +44,23 @@ namespace MyMoviesAPI.Services.MovieService
             movie.Director = request.Director;
             movie.YearOfRelease = request.YearOfRelease;
 
-            return movies;
+            await _context.SaveChangesAsync();
+
+            return await GetAllMovies();
         }
 
-        public List<Movie>? DeleteMovie(int id)
+        public async Task<List<Movie>?> DeleteMovie(int id)
         {
-            var movie = movies.Find(m => m.Id == id);
+            var movie = await _context.Movies.FindAsync(id);
 
             if (movie is null)
                 return null;
 
-            movies.Remove(movie);
-            return movies;
+            _context.Movies.Remove(movie);
+
+            await _context.SaveChangesAsync();
+
+            return await GetAllMovies();
         }
     }
 }

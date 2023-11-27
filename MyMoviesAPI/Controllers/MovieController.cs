@@ -18,15 +18,13 @@ namespace MyMoviesAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Movie>>> GetAllMovies()
         {
-            var result = _movieService.GetAllMovies();
-
-            return Ok(result);
+            return Ok(await _movieService.GetAllMovies());
         }
         
         [HttpGet("{id}")]
         public async Task<ActionResult<Movie>> GetSingleMovie(int id)
         {
-            var result = _movieService.GetSingleMovie(id);
+            var result = await _movieService.GetSingleMovie(id);
 
             if (result is null)
                 return NotFound("Movie not found.");
@@ -37,14 +35,14 @@ namespace MyMoviesAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<List<Movie>>> AddMovie(Movie movie)
         {
-            var result = _movieService.AddMovie(movie);
+            var result = await _movieService.AddMovie(movie);
             return Ok(result);
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult<List<Movie>>> UpdateMovie(int id, Movie request)
         {
-            var result = _movieService.UpdateMovie(id, request);
+            var result = await _movieService.UpdateMovie(id, request);
 
             if (result is null)
                 return NotFound("Movie not found.");
@@ -55,7 +53,7 @@ namespace MyMoviesAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<List<Movie>>> DeleteMovie(int id)
         {
-            var result = _movieService.DeleteMovie(id);
+            var result = await _movieService.DeleteMovie(id);
 
             if (result is null)
                 return NotFound("Movie not found.");

@@ -1,4 +1,5 @@
 global using MyMoviesAPI.Models;
+global using MyMoviesAPI.Data;
 using MyMoviesAPI.Services.MovieService;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IMovieService, MovieService>();
+builder.Services.AddDbContext<DataContext>();
 
 var app = builder.Build();
 
