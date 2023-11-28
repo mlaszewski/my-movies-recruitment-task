@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyMoviesAPI.Services.MovieService;
 
@@ -20,7 +21,7 @@ namespace MyMoviesAPI.Controllers
         {
             return Ok(await _movieService.GetAllMovies());
         }
-        
+
         [HttpGet("{id}")]
         public async Task<ActionResult<Movie>> GetSingleMovie(int id)
         {
@@ -31,7 +32,7 @@ namespace MyMoviesAPI.Controllers
 
             return Ok(result);
         }
-        
+
         [HttpPost]
         public async Task<ActionResult<List<Movie>>> AddMovie(Movie movie)
         {
