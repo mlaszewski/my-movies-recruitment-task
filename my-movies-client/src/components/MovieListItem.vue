@@ -13,7 +13,7 @@
 
 <script>
 import Swal from "sweetalert2";
-import axios from "axios";
+import {deleteMovie} from "@/assets/ServiceAPI";
 
 export default {
   name: 'MovieListItem',
@@ -35,7 +35,7 @@ export default {
         confirmButtonText: 'Yes, delete it!'
       }).then(async (result) => {
         if (result.isConfirmed) {
-          await axios.delete(`/api/Movie/${this.movie.id}`)
+          await deleteMovie(this.movie.id)
               .then(response => {
                 Swal.fire({
                   icon: 'success',
@@ -60,7 +60,6 @@ export default {
       });
     },
     handleEdit() {
-      console.log(this.movie.title)
       this.$emit('edit', this.movie);
     }
   }

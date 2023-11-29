@@ -59,10 +59,10 @@
 </template>
 
 <script>
-import axios from "axios";
 import Swal from "sweetalert2";
 import {useVuelidate} from "@vuelidate/core";
 import {required, minValue, maxValue, maxLength} from "@vuelidate/validators";
+import {editMovie} from "@/assets/ServiceAPI";
 
 export default {
   name: 'EditMovieForm',
@@ -98,11 +98,7 @@ export default {
         this.isLoading = false;
         return;
       }
-      await axios.put(`/api/Movie/${this.movie.id}`, JSON.stringify(this.newMovie), {
-        headers: {
-          'content-type': 'text/json'
-        }
-      })
+      await editMovie(this.movie.id, this.newMovie)
           .then(response => {
             Swal.fire({
               icon: 'success',

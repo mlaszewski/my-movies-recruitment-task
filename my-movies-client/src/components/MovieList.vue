@@ -4,7 +4,7 @@
       <button class="btn btn-primary mx-1" @click="toggleAddModal">
         Add new movie
       </button>
-      <button class="btn btn-outline-primary mx-1">
+      <button class="btn btn-outline-primary mx-1" @click="fetchExternalMovieList">
         Fetch movies
       </button>
     </div>
@@ -70,12 +70,12 @@
 </template>
 
 <script>
-import axios from "axios";
 import Swal from "sweetalert2";
 import MovieListItem from "@/components/MovieListItem.vue";
 import UIModal from "@/components/Modal.vue";
 import AddMovieForm from "@/components/AddMovieForm.vue";
 import EditMovieForm from "@/components/EditMovieForm.vue";
+import {addMovie, getExternalMovieList, getMovieList} from "@/assets/ServiceAPI";
 
 export default {
   name: 'MovieList',
@@ -90,15 +90,15 @@ export default {
     }
   },
   mounted() {
-    this.fetchProjectList();
+    this.fetchMovieList();
   },
   methods: {
     setMovies(movies) {
       this.movies = movies;
     },
-    fetchProjectList() {
+    async fetchMovieList() {
       this.isLoading = true;
-      axios.get('/api/Movie')
+      await getMovieList()
           .then(response => {
             this.setMovies(response.data);
             return response;
@@ -127,8 +127,37 @@ export default {
             this.isLoading = false;
           });
     },
+    async fetchExternalMovieList() {
+      this.isLoading = true;
+      await getExternalMovieList()
+          .then(async response => {
+            for (const movie of response.data) {
+              const {title, director, year} = movie;
+              if(this.movies.findIndex(item => item.title === title) === -1) {
+                await addMovie({
+                  "title": title,
+                  "director": director,
+                  "yearOfRelease": year
+                })
+              }
+            }
+            await this.fetchMovieList();
+            return response;
+          }).catch(error => {
+            Swal.fire({
+              icon: 'error',
+              title: "There was an error fetching movies.",
+              showConfirmButton: false,
+              position: "bottom-end",
+              toast: true,
+              timer: 3500
+            })
+            return error;
+          }).finally(() => {
+            this.isLoading = false;
+          })
+    },
     toggleEditModal(movie) {
-      console.log(movie)
       this.selectedMovie = movie;
       this.showEditModal = !this.showEditModal;
     },
