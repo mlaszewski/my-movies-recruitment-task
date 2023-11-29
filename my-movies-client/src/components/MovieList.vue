@@ -1,0 +1,144 @@
+<template>
+  <div class="card">
+    <div class="card-header">
+      <button class="btn btn-primary mx-1" @click="toggleAddModal">
+        Add new movie
+      </button>
+      <button class="btn btn-outline-primary mx-1">
+        Fetch movies
+      </button>
+    </div>
+    <div class="card-body">
+      <table class="table table-bordered table-responsive">
+        <thead>
+        <tr class="align-middle text-center">
+          <th>Id</th>
+          <th>Title</th>
+          <th>Director</th>
+          <th>Year</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-if="isLoading">
+          <td class="text-center" colspan="5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </td>
+        </tr>
+        <template v-if="!isLoading && movies.length > 0">
+          <MovieListItem
+              v-for="movie in movies"
+              :key="movie.id"
+              :movie="movie"
+              @edit="toggleEditModal"
+              @setList="setMovies"/>
+        </template>
+        <tr v-if="!isLoading && movies.length === 0">
+          <td class="text-center" colspan="5">No movies found.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <teleport v-if="showAddModal" to=".modals">
+    <UIModal
+        title="Add new movie"
+        @closeModal="toggleAddModal"
+    >
+      <AddMovieForm
+          @closeModal="toggleAddModal"
+          @setList="setMovies"
+      />
+    </UIModal>
+  </teleport>
+
+  <teleport v-if="showEditModal" to=".modals">
+    <UIModal
+        title="Edit movie"
+        @closeModal="toggleEditModal"
+    >
+      <EditMovieForm
+          :movie="selectedMovie"
+          @closeModal="toggleEditModal"
+          @setList="setMovies"
+      />
+    </UIModal>
+  </teleport>
+</template>
+
+<script>
+import axios from "axios";
+import Swal from "sweetalert2";
+import MovieListItem from "@/components/MovieListItem.vue";
+import UIModal from "@/components/Modal.vue";
+import AddMovieForm from "@/components/AddMovieForm.vue";
+import EditMovieForm from "@/components/EditMovieForm.vue";
+
+export default {
+  name: 'MovieList',
+  components: {EditMovieForm, AddMovieForm, MovieListItem, UIModal},
+  data() {
+    return {
+      movies: [],
+      isLoading: false,
+      showEditModal: false,
+      showAddModal: false,
+      selectedMovie: null
+    }
+  },
+  mounted() {
+    this.fetchProjectList();
+  },
+  methods: {
+    setMovies(movies) {
+      this.movies = movies;
+    },
+    fetchProjectList() {
+      this.isLoading = true;
+      axios.get('/api/Movie')
+          .then(response => {
+            this.setMovies(response.data);
+            return response;
+          })
+          .catch(error => {
+            console.log(error);
+            let errorMessage = 'An unexpected error occured.';
+            if (error.response.status === 404)
+              errorMessage = 'No movies found.';
+            else if (error.response.status === 500)
+              errorMessage = 'An error occured while fetching movies.';
+            else if (error.response.status === 401)
+              errorMessage = 'You are not authorized to view this page.';
+
+            Swal.fire({
+              icon: 'error',
+              title: errorMessage,
+              showConfirmButton: false,
+              position: "bottom-end",
+              toast: true,
+              timer: 3500
+            })
+            return error
+          })
+          .finally(() => {
+            this.isLoading = false;
+          });
+    },
+    toggleEditModal(movie) {
+      console.log(movie)
+      this.selectedMovie = movie;
+      this.showEditModal = !this.showEditModal;
+    },
+    toggleAddModal() {
+      this.showAddModal = !this.showAddModal;
+    }
+  },
+}
+</script>
+
+<style>
+
+</style>

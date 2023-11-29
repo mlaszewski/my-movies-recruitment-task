@@ -2,17 +2,17 @@
   <div id="app">
     <div class="container">
       <h2 class="text-center mt-5 mb-3">My Movies</h2>
-      <MoviesList />
+      <MovieList/>
     </div>
   </div>
 </template>
 
 <script>
-import MoviesList from "@/components/MoviesList.vue";
+import MovieList from "@/components/MovieList.vue";
 
 export default {
   name: 'App',
-  components: {MoviesList}
+  components: {MovieList}
 }
 </script>
 
